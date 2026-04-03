@@ -48,14 +48,22 @@
 
 ---
 
+## Terminal UI
+
+<p align="center">
+  <img src="./resources/demos/demo_v2.png" alt="Carbon Terminal Demo" width="100%">
+</p>
+
+---
+
 ## Platform Support
 
 | Platform   | Status               |
 |------------|----------------------|
-| macOS      | ✅ Supported (13.0+)  |
-| carbonOS   | ✅ Supported          |
-| Linux      | ✅ Supported          |
-| Windows    | ✅ Supported          |
+| macOS      | Supported (13.0+)  |
+| carbonOS   | Supported          |
+| Linux      | Supported          |
+| Windows    | Supported          |
 
 ---
 

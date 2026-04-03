@@ -233,6 +233,6 @@ export const SWATCHES: {
   { preset: 'dark',    label: 'Dark',    bg: '#1a1a1a',           fg: 'rgba(255,255,255,0.15)', accentText: 'rgba(255,255,255,0.5)' },
   { preset: 'vscode',  label: 'VS Code', bg: '#1e1e1e',           fg: 'rgba(255,255,255,0.15)', accentText: 'rgba(255,255,255,0.5)' },
   { preset: 'monokai', label: 'Monokai', bg: '#272822',           fg: 'rgba(255,255,255,0.15)', accentText: 'rgba(255,255,255,0.5)' },
-  { preset: 'dracula', label: 'Dracula', bg: '#282a36',           fg: 'rgba(255,255,255,0.15)', accentText: 'rgba(255,255,255,0.5)' },
+  { preset: 'dracula', label: 'Mode V2', bg: '#282a36',           fg: 'rgba(255,255,255,0.15)', accentText: 'rgba(255,255,255,0.5)' },
   { preset: 'light',   label: 'Light',   bg: 'rgba(0,0,0,0.04)', fg: 'rgba(0,0,0,0.1)',        accentText: 'rgba(0,0,0,0.35)'      },
 ]
