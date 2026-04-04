@@ -1,6 +1,12 @@
 #!/bin/bash
 set -e
 
+# ── Args ──────────────────────────────────────────────────────────────────────
+BUILD_TYPE=Debug
+for arg in "$@"; do
+    [[ "$arg" == "--release" ]] && BUILD_TYPE=Release
+done
+
 # ── App icon ──────────────────────────────────────────────────────────────────
 ICON_PNG="resources/assets/logo.png"
 ICON_ICNS="resources/assets/logo.icns"
@@ -18,7 +24,8 @@ echo "→ building web frontend..."
 (cd app/frontend && npm install --silent && npm run build)
 
 # ── Native ────────────────────────────────────────────────────────────────────
-cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
+echo "→ building native ($BUILD_TYPE)..."
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=$BUILD_TYPE
 cmake --build build
 
 echo ""
