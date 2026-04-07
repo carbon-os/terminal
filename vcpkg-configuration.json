@@ -1,0 +1,15 @@
+{
+  "default-registry": {
+    "kind": "git",
+    "repository": "https://github.com/microsoft/vcpkg",
+    "baseline": "3508985146f1b1d248c67ead13f8f54be5b4f5da"
+  },
+  "registries": [
+    {
+      "kind": "git",
+      "repository": "https://github.com/carbon-os/ui",
+      "baseline": "0f9da6d26681a7c2ad902197817bc7ece71dab2f",
+      "packages": ["ui"]
+    }
+  ]
+}

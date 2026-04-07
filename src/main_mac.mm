@@ -1,14 +1,16 @@
-// macOS entry – Obj-C++ so NSBundle path resolution is trivial
 #import <Cocoa/Cocoa.h>
 #include <ui/webview.h>
 #include "ipc.h"
 #include "mac/pty.h"
 #include "mac/prefs.h"
 #include "mac/clipboard.h"
-#include <cstdio>
+#include <logger/logger.h>
 
 int main(int, const char**) {
     @autoreleasepool {
+#if DEBUG
+        logger::SetEnabled(true);
+#endif
 
         ui::WebView wv({
             .title   = "Carbon Terminal",
@@ -30,16 +32,15 @@ int main(int, const char**) {
 #if DEBUG
             wv.load_url("http://localhost:5173/");
 #else
-            // Resolve Resources/web/index.html inside the .app bundle
             NSURL *web = [NSBundle.mainBundle URLForResource:@"web/index"
                                               withExtension:@"html"];
             if (web) wv.load_file(web.path.UTF8String);
-            else     std::puts("[app] ERROR: could not find web bundle");
+            else     logger::Error("[app] could not find web bundle");
 #endif
         });
 
         wv.on_close([&wv]() -> bool {
-            std::puts("[app] window closed – shutting down");
+            logger::Info("[app] window closed – shutting down");
             wv.terminate();
             return true;
         });

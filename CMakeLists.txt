@@ -1,27 +1,18 @@
 cmake_minimum_required(VERSION 3.22)
-project(CarbonTerminal LANGUAGES C OBJC OBJCXX CXX)
+
+if(APPLE)
+    project(CarbonTerminal LANGUAGES C OBJC OBJCXX CXX)
+else()
+    project(CarbonTerminal LANGUAGES C CXX)
+endif()
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# ── FetchContent ──────────────────────────────────────────────────────────────
-include(FetchContent)
-set(FETCHCONTENT_BASE_DIR ${CMAKE_SOURCE_DIR}/deps)
-
-FetchContent_Declare(ui
-    GIT_REPOSITORY https://github.com/carbon-os/ui.git
-    GIT_TAG        main
-    SOURCE_DIR     ${CMAKE_SOURCE_DIR}/deps/ui
-)
-FetchContent_Declare(nlohmann_json
-    GIT_REPOSITORY https://github.com/nlohmann/json.git
-    GIT_TAG        v3.11.3
-    SOURCE_DIR     ${CMAKE_SOURCE_DIR}/deps/json
-)
-set(JSON_BuildTests OFF CACHE BOOL "" FORCE)
-set(JSON_Install    OFF CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(ui nlohmann_json)
+# ── Dependencies ──────────────────────────────────────────────────────────────
+find_package(ui            CONFIG REQUIRED)
+find_package(nlohmann_json CONFIG REQUIRED)
 
 # ── Shared sources ────────────────────────────────────────────────────────────
 set(SOURCES
@@ -86,12 +77,15 @@ elseif(WIN32)
         src/win/pty.cpp
         src/win/prefs.cpp
     )
-    add_executable(CarbonTerminal WIN32 ${SOURCES})
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        add_executable(CarbonTerminal ${SOURCES})
+    else()
+        add_executable(CarbonTerminal WIN32 ${SOURCES})
+    endif()
     target_link_libraries(CarbonTerminal PRIVATE
         ui::ui nlohmann_json::nlohmann_json
-        shlwapi shell32  # SHGetFolderPath
+        shlwapi shell32
     )
-    # Copy web bundle beside the exe after build
     add_custom_command(TARGET CarbonTerminal POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
             "${CMAKE_SOURCE_DIR}/app/frontend/dist"
@@ -111,7 +105,6 @@ elseif(UNIX)
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(WEBKIT REQUIRED webkit2gtk-4.1)
 
-    # Web bundle install dir — override with -DCT_INSTALL_WEBDIR=...
     if(NOT DEFINED CT_INSTALL_WEBDIR)
         set(CT_INSTALL_WEBDIR "${CMAKE_INSTALL_PREFIX}/share/CarbonTerminal/web")
     endif()
@@ -121,10 +114,9 @@ elseif(UNIX)
     )
     target_link_libraries(CarbonTerminal PRIVATE
         ui::ui nlohmann_json::nlohmann_json
-        util  # forkpty
+        util
     )
 
-    # Install rules
     install(TARGETS CarbonTerminal DESTINATION bin)
     install(DIRECTORY "${CMAKE_SOURCE_DIR}/app/frontend/dist/"
             DESTINATION "${CT_INSTALL_WEBDIR}")

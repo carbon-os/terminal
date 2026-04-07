@@ -13,7 +13,8 @@ static fs::path config_dir() {
     if (SUCCEEDED(SHGetFolderPathW(nullptr, CSIDL_APPDATA, nullptr, 0, buf)))
         return fs::path(buf) / L"CarbonTerminal";
     // fallback: beside the exe
-    return fs::path(std::getenv("APPDATA") ?: ".") / "CarbonTerminal";
+    const char* appdata = std::getenv("APPDATA");
+    return fs::path(appdata ? appdata : ".") / "CarbonTerminal";
 }
 
 static std::string read_file(const fs::path& p, std::string_view fallback) {

@@ -4,17 +4,20 @@
 #include "ipc.h"
 #include "win/pty.h"
 #include "win/prefs.h"
-#include <cstdio>
+#include <logger/logger.h>
 
-int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
+int main(int argc, char* argv[]) {
+
+    logger::SetEnabled(false);
+
     ui::WebView wv({
-        .title   = "Carbon Terminal",
-        .width   = 1280,
-        .height  = 800,
-#if _DEBUG
-        .debug   = true,
-        .logging = true,
-#endif
+        .title         = "Carbon Terminal",
+        .width         = 1280,
+        .height        = 800,
+        .debug         = true,
+        .logging       = false,
+        .runtime_path  = "C:\\Users\\cloud\\Desktop\\ui\\webview2_runtime\\146.0.3856.97",
+        .user_data_dir = "C:\\Users\\cloud\\Desktop\\terminal\\cache",
     });
 
     ct::IPC ipc(wv);
@@ -23,19 +26,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     ct::win::register_pty_handlers(ipc);
 
     wv.on_ready([&wv]() {
-#if _DEBUG
-        wv.load_url("http://localhost:5173/");
-#else
-        // Installer drops the web bundle beside the exe under web\
-        wchar_t exePath[MAX_PATH]{};
-        GetModuleFileNameW(nullptr, exePath, MAX_PATH);
-        std::filesystem::path webDir =
-            std::filesystem::path(exePath).parent_path() / "web" / "index.html";
-        wv.load_file(webDir.string());
-#endif
+        logger::Info("[app] webview ready");
+        wv.load_file("C:\\Users\\cloud\\Desktop\\terminal\\app\\frontend\\dist\\index.html");
     });
 
     wv.on_close([&wv]() -> bool {
+        logger::Info("[app] window closed – shutting down");
         wv.terminate();
         return true;
     });

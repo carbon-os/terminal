@@ -2,9 +2,13 @@
 #include "ipc.h"
 #include "linux/pty.h"
 #include "linux/prefs.h"
-#include <cstdio>
+#include <logger/logger.h>
 
 int main() {
+#if DEBUG
+    logger::SetEnabled(true);
+#endif
+
     ui::WebView wv({
         .title   = "Carbon Terminal",
         .width   = 1280,
@@ -24,12 +28,12 @@ int main() {
 #if DEBUG
         wv.load_url("http://localhost:5173/");
 #else
-        wv.load_file(CT_WEB_DIR "/index.html"); // set by CMake install rules
+        wv.load_file(CT_WEB_DIR "/index.html");
 #endif
     });
 
     wv.on_close([&wv]() -> bool {
-        std::puts("[app] window closed – shutting down");
+        logger::Info("[app] window closed – shutting down");
         wv.terminate();
         return true;
     });

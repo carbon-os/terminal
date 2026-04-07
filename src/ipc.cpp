@@ -1,22 +1,23 @@
 #include "ipc.h"
-#include <cstdio>
+#include <logger/logger.h>
 
 namespace ct {
 
-IPC::IPC(ui::WebView& wv) : wv_(wv) {
+IPC::IPC(ui::WebView& wv) : wv_(wv)
+{
     wv_.on_message(kWireChannel, [this](ui::Message msg) {
         if (!msg.is_binary()) return;
 
         auto pkt = Packet::decode(std::span{ msg.data() });
         if (!pkt) {
-            std::puts("[ipc] malformed frame – dropped");
+            logger::Warn("[ipc] malformed frame – dropped");
             return;
         }
 
         std::unique_lock lock(mutex_);
         auto it = handlers_.find(pkt->channel);
         if (it == handlers_.end()) return;
-        auto cb = it->second;          // copy so we can unlock before calling
+        auto cb = it->second;
         lock.unlock();
 
         cb(std::move(*pkt));
@@ -34,7 +35,8 @@ void IPC::off(std::string_view channel) {
 }
 
 void IPC::send(Packet pkt) {
-    wv_.post_message(kWireChannel, pkt.encode());
+    auto encoded = pkt.encode();
+    wv_.post_message(kWireChannel, encoded);
 }
 
 void IPC::send_text(std::string_view channel,
@@ -46,7 +48,8 @@ void IPC::send_text(std::string_view channel,
     p.session_id = session_id;
     p.payload    = { reinterpret_cast<const uint8_t*>(text.data()),
                      reinterpret_cast<const uint8_t*>(text.data()) + text.size() };
-    send(std::move(p));
+    auto encoded = p.encode();
+    wv_.post_message(kWireChannel, encoded);
 }
 
 void IPC::send_binary(std::string_view channel,
@@ -57,7 +60,8 @@ void IPC::send_binary(std::string_view channel,
     p.channel    = channel;
     p.session_id = session_id;
     p.payload    = { data.begin(), data.end() };
-    send(std::move(p));
+    auto encoded = p.encode();
+    wv_.post_message(kWireChannel, encoded);
 }
 
 } // namespace ct

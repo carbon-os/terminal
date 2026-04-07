@@ -11,3 +11,5 @@ dist/
 package-lock.json
 
 deps/
+
+cache/
