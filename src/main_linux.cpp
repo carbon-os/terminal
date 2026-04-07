@@ -25,11 +25,7 @@ int main() {
     ct::linux_::register_pty_handlers(ipc);
 
     wv.on_ready([&wv]() {
-#if DEBUG
-        wv.load_url("http://localhost:5173/");
-#else
-        wv.load_file(CT_WEB_DIR "/index.html");
-#endif
+        wv.load_file("/home/user/terminal/app/frontend/dist/index.html");
     });
 
     wv.on_close([&wv]() -> bool {
