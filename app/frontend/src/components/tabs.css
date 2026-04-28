@@ -1,0 +1,339 @@
+.browser-tabs {
+  box-sizing: border-box;
+  position: relative;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  font-size: 12px;
+  height: 46px;
+  padding: 8px 3px 4px 3px;
+  background: var(--tab-bar-bg, #dee1e6);
+  border-radius: 5px 5px 0 0;
+  overflow: hidden;
+}
+
+.browser-tabs * {
+  box-sizing: inherit;
+  font: inherit;
+}
+
+.browser-tabs .browser-tabs-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.browser-tabs .browser-tab {
+  position: absolute;
+  left: 0;
+  height: 36px;
+  width: 240px;
+  border: 0;
+  margin: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.browser-tabs .browser-tab,
+.browser-tabs .browser-tab * {
+  user-select: none;
+  cursor: default;
+}
+
+.browser-tabs .browser-tab .browser-tab-dividers {
+  position: absolute;
+  top: 7px;
+  bottom: 7px;
+  left: var(--tab-content-margin);
+  right: var(--tab-content-margin);
+}
+
+.browser-tabs .browser-tab .browser-tab-dividers,
+.browser-tabs .browser-tab .browser-tab-dividers::before,
+.browser-tabs .browser-tab .browser-tab-dividers::after {
+  pointer-events: none;
+}
+
+.browser-tabs .browser-tab .browser-tab-dividers::before,
+.browser-tabs .browser-tab .browser-tab-dividers::after {
+  content: "";
+  display: block;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: #a9adb0;
+  opacity: 1;
+  transition: opacity 0.2s ease;
+}
+
+.browser-tabs .browser-tab .browser-tab-dividers::before {
+  left: 0;
+}
+
+.browser-tabs .browser-tab .browser-tab-dividers::after {
+  right: 0;
+}
+
+.browser-tabs .browser-tab:first-child .browser-tab-dividers::before,
+.browser-tabs .browser-tab:last-child .browser-tab-dividers::after {
+  opacity: 0;
+}
+
+.browser-tabs .browser-tab .browser-tab-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.browser-tabs .browser-tab .browser-tab-background > svg {
+  width: 100%;
+  height: 100%;
+}
+
+.browser-tabs .browser-tab .browser-tab-background > svg .browser-tab-geometry {
+  fill: #f4f5f6;
+}
+
+.browser-tabs .browser-tab[active] {
+  z-index: 5;
+}
+
+.browser-tabs .browser-tab[active] .browser-tab-background > svg .browser-tab-geometry {
+  fill: var(--tab-active-bg, #fff);
+}
+
+.browser-tabs .browser-tab:not([active]) .browser-tab-background {
+  transition: opacity 0.2s ease;
+  opacity: 0;
+}
+
+@media (hover: hover) {
+  .browser-tabs .browser-tab:not([active]):hover {
+    z-index: 2;
+  }
+
+  .browser-tabs .browser-tab:not([active]):hover .browser-tab-background {
+    opacity: 1;
+  }
+}
+
+.browser-tabs .browser-tab.browser-tab-was-just-added {
+  top: 10px;
+  animation: browser-tab-was-just-added 120ms forwards ease-in-out;
+}
+
+@keyframes browser-tab-was-just-added {
+  to {
+    top: 0;
+  }
+}
+
+.browser-tabs .browser-tab .browser-tab-content {
+  position: absolute;
+  display: flex;
+  top: 0;
+  bottom: 0;
+  left: var(--tab-content-margin);
+  right: var(--tab-content-margin);
+  padding: 9px 8px;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  overflow: hidden;
+  pointer-events: all;
+}
+
+.browser-tabs .browser-tab[is-mini] .browser-tab-content {
+  padding-left: 2px;
+  padding-right: 2px;
+}
+
+.browser-tabs .browser-tab .browser-tab-favicon {
+  position: relative;
+  flex-shrink: 0;
+  flex-grow: 0;
+  height: 16px;
+  width: 16px;
+  background-size: 16px;
+  margin-left: 4px;
+}
+
+.browser-tabs .browser-tab[is-small] .browser-tab-favicon {
+  margin-left: 0;
+}
+
+.browser-tabs .browser-tab[is-mini]:not([active]) .browser-tab-favicon {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.browser-tabs .browser-tab[is-mini][active] .browser-tab-favicon {
+  display: none;
+}
+
+.browser-tabs .browser-tab .browser-tab-title {
+  flex: 1;
+  vertical-align: top;
+  overflow: hidden;
+  white-space: nowrap;
+  margin-left: 4px;
+  color: #5f6368;
+  -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 calc(100% - 24px), transparent);
+  mask-image: linear-gradient(90deg, #000 0%, #000 calc(100% - 24px), transparent);
+}
+
+.browser-tabs .browser-tab[is-small] .browser-tab-title {
+  margin-left: 0;
+}
+
+.browser-tabs .browser-tab .browser-tab-favicon + .browser-tab-title,
+.browser-tabs .browser-tab[is-small] .browser-tab-favicon + .browser-tab-title {
+  margin-left: 8px;
+}
+
+.browser-tabs .browser-tab[is-smaller] .browser-tab-favicon + .browser-tab-title,
+.browser-tabs .browser-tab[is-mini] .browser-tab-title {
+  display: none;
+}
+
+.browser-tabs .browser-tab[active] .browser-tab-title {
+  color: #45474a;
+}
+
+.browser-tabs .browser-tab .browser-tab-drag-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+.browser-tabs .browser-tab .browser-tab-close {
+  flex-grow: 0;
+  flex-shrink: 0;
+  position: relative;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'><path stroke='rgba(0, 0, 0, .65)' stroke-linecap='square' stroke-width='1.5' d='M0 0 L8 8 M8 0 L0 8'></path></svg>");
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: 8px 8px;
+}
+
+@media (hover: hover) {
+  .browser-tabs .browser-tab .browser-tab-close:hover {
+    background-color: #e8eaed;
+  }
+
+  .browser-tabs .browser-tab .browser-tab-close:hover:active {
+    background-color: #dadce0;
+  }
+}
+
+@media not all and (hover: hover) {
+  .browser-tabs .browser-tab .browser-tab-close:active {
+    background-color: #dadce0;
+  }
+}
+
+@media (hover: hover) {
+  .browser-tabs .browser-tab:not([active]) .browser-tab-close:not(:hover):not(:active) {
+    opacity: 0.8;
+  }
+}
+
+.browser-tabs .browser-tab[is-smaller] .browser-tab-close {
+  margin-left: auto;
+}
+
+.browser-tabs .browser-tab[is-mini]:not([active]) .browser-tab-close {
+  display: none;
+}
+
+.browser-tabs .browser-tab[is-mini][active] .browser-tab-close {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.browser-tabs.browser-tabs-is-sorting .browser-tab:not(.browser-tab-is-dragging),
+.browser-tabs:not(.browser-tabs-is-sorting) .browser-tab.browser-tab-was-just-dragged {
+  transition: transform 120ms ease-in-out;
+}
+
+.browser-tabs .browser-tabs-bottom-bar {
+  position: absolute;
+  bottom: 0;
+  height: 4px;
+  left: 0;
+  width: 100%;
+  background: var(--tab-active-bg, #fff);
+  z-index: 10;
+}
+
+.browser-tabs-optional-shadow-below-bottom-bar {
+  position: relative;
+  height: 1px;
+  width: 100%;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1' height='1' viewBox='0 0 1 1'><rect x='0' y='0' width='1' height='1' fill='rgba(0, 0, 0, .17)'></rect></svg>");
+  background-size: 1px 1px;
+  background-repeat: repeat-x;
+  background-position: 0% 0%;
+}
+
+@media only screen and (-webkit-min-device-pixel-ratio: 2),
+       only screen and (min-resolution: 192dpi),
+       only screen and (min-resolution: 2dppx) {
+  .browser-tabs-optional-shadow-below-bottom-bar {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='2' height='2' viewBox='0 0 2 2'><rect x='0' y='0' width='2' height='1' fill='rgba(0, 0, 0, .27)'></rect></svg>");
+  }
+}
+
+/* ── Dark theme ───────────────────────────────────────────── */
+
+.browser-tabs.browser-tabs-dark-theme {
+  background: var(--tab-bar-bg, #202124);
+}
+
+.browser-tabs.browser-tabs-dark-theme .browser-tab .browser-tab-dividers::before,
+.browser-tabs.browser-tabs-dark-theme .browser-tab .browser-tab-dividers::after {
+  background: #4a4d51;
+}
+
+.browser-tabs.browser-tabs-dark-theme .browser-tab .browser-tab-background > svg .browser-tab-geometry {
+  fill: #292b2e;
+}
+
+.browser-tabs.browser-tabs-dark-theme .browser-tab[active] .browser-tab-background > svg .browser-tab-geometry {
+  fill: var(--tab-active-bg, #323639);
+}
+
+.browser-tabs.browser-tabs-dark-theme .browser-tab .browser-tab-title {
+  color: #9ca1a7;
+}
+
+.browser-tabs.browser-tabs-dark-theme .browser-tab[active] .browser-tab-title {
+  color: #f1f3f4;
+}
+
+.browser-tabs.browser-tabs-dark-theme .browser-tab .browser-tab-close {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'><path stroke='rgba(154, 160, 166, .8)' stroke-linecap='square' stroke-width='1.5' d='M0 0 L8 8 M8 0 L0 8'></path></svg>");
+}
+
+.browser-tabs.browser-tabs-dark-theme .browser-tab .browser-tab-close:hover {
+  background-color: #5f6368;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'><path stroke='rgba(255, 255, 255, .7)' stroke-linecap='square' stroke-width='1.5' d='M0 0 L8 8 M8 0 L0 8'></path></svg>");
+}
+
+.browser-tabs.browser-tabs-dark-theme .browser-tab .browser-tab-close:hover:active {
+  background-color: #80868b;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'><path stroke='rgba(255, 255, 255, .9)' stroke-linecap='square' stroke-width='1.5' d='M0 0 L8 8 M8 0 L0 8'></path></svg>");
+}
+
+.browser-tabs.browser-tabs-dark-theme .browser-tabs-bottom-bar {
+  background: var(--tab-active-bg, #323639);
+}

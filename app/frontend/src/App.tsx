@@ -1,21 +1,20 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import TerminalView from './components/Terminal'
-import Settings from './components/Settings'
+import BrowserTabs  from './components/BrowserTabs'
+import Settings     from './components/Settings'
 import {
-    TerminalSettings, DEFAULT_SETTINGS, THEME_PRESETS,
-    TerminalSession, Profile,
+    TerminalSettings, DEFAULT_SETTINGS, THEME_PRESETS, PANEL_THEMES,
+    TerminalSession, Profile, ShellType, SHELL_DEFS,
 } from './components/types'
-import { RiSettings3Line } from 'react-icons/ri'
 import { ipc } from './ipc/client'
 
 const dec = new TextDecoder()
 
 export default function App() {
     const [settings, setSettings] = useState<TerminalSettings>(DEFAULT_SETTINGS)
-    const [open, setOpen]         = useState(false)
 
     const [sessions, setSessions] = useState<TerminalSession[]>(() => [
-        { id: crypto.randomUUID(), name: 'Terminal 1' },
+        { id: crypto.randomUUID(), name: 'Windows PowerShell', shell: 'powershell', kind: 'terminal' },
     ])
     const [activeId, setActiveId] = useState(() => sessions[0].id)
 
@@ -23,9 +22,9 @@ export default function App() {
         { id: 'default', name: 'Default', settings: DEFAULT_SETTINGS },
     ])
 
-    const profilesReady   = useRef(false)
-    const settingsReady   = useRef(false)
-    const skipProfileSave = useRef(false)
+    const profilesReady    = useRef(false)
+    const settingsReady    = useRef(false)
+    const skipProfileSave  = useRef(false)
     const skipSettingsSave = useRef(false)
 
     // ── Prefs load on mount ───────────────────────────────────────────────────
@@ -71,20 +70,21 @@ export default function App() {
         ipc.sendJSON('prefs.settings.save', '', settings)
     }, [settings])
 
-    // ── Theme-derived style values ────────────────────────────────────────────
-    const termBg       = (THEME_PRESETS[settings.theme] as any).background as string
-    const isLight      = settings.theme === 'light'
-    const topBorder    = isLight ? 'rgba(0,0,0,0.1)'    : 'rgba(255,255,255,0.08)'
-    const btnBase      = isLight ? 'rgba(0,0,0,0.07)'   : 'rgba(255,255,255,0.08)'
-    const btnHover     = isLight ? 'rgba(0,0,0,0.14)'   : 'rgba(255,255,255,0.18)'
-    const btnBorder    = isLight ? 'rgba(0,0,0,0.18)'   : 'rgba(255,255,255,0.15)'
-    const btnColor     = isLight ? '#444'                : '#aaa'
-    const btnColorHover = isLight ? '#000'               : '#fff'
+    // ── Theme-derived values ──────────────────────────────────────────────────
+    const termBg    = (THEME_PRESETS[settings.theme] as any).background as string
+    const ui        = PANEL_THEMES[settings.theme]
+    const isLight   = settings.theme === 'light'
+    const topBorder = isLight ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.08)'
 
     // ── Session handlers ──────────────────────────────────────────────────────
-    const addSession = useCallback(() => {
-        const id = crypto.randomUUID()
-        setSessions(prev => [...prev, { id, name: `Terminal ${prev.length + 1}` }])
+    const addSession = useCallback((
+        shell: ShellType = 'powershell',
+        profile?: Profile,
+    ) => {
+        if (profile) setSettings(profile.settings)
+        const id    = crypto.randomUUID()
+        const label = SHELL_DEFS.find(s => s.type === shell)?.label ?? 'Terminal'
+        setSessions(prev => [...prev, { id, name: label, shell, kind: 'terminal' }])
         setActiveId(id)
     }, [])
 
@@ -97,12 +97,22 @@ export default function App() {
         })
     }, [activeId])
 
-    const renameSession = useCallback((id: string, name: string) => {
-        setSessions(prev => prev.map(s => s.id === id ? { ...s, name } : s))
+    // ── Settings tab ──────────────────────────────────────────────────────────
+    const openSettings = useCallback(() => {
+        setSessions(prev => {
+            const existing = prev.find(s => s.kind === 'settings')
+            if (existing) {
+                setActiveId(existing.id)
+                return prev
+            }
+            const id = crypto.randomUUID()
+            setActiveId(id)
+            return [...prev, { id, name: 'Settings', shell: 'powershell', kind: 'settings' }]
+        })
     }, [])
 
     // ── Profile handlers ──────────────────────────────────────────────────────
-    const saveProfile = useCallback((name: string) => {
+    const saveProfile   = useCallback((name: string) => {
         setProfiles(prev => [...prev, { id: crypto.randomUUID(), name, settings }])
     }, [settings])
 
@@ -124,86 +134,66 @@ export default function App() {
     // ── Render ────────────────────────────────────────────────────────────────
     return (
         <div style={{
-            display:    'flex',
-            width:      '100vw',
-            height:     '100vh',
-            background: termBg,
-            overflow:   'hidden',
-            transition: 'background 0.3s ease',
-            borderTop:  `1px solid ${topBorder}`,
+            display:       'flex',
+            flexDirection: 'column',
+            width:         '100vw',
+            height:        '100vh',
+            background:    termBg,
+            overflow:      'hidden',
+            transition:    'background 0.3s ease',
+            borderTop:     `1px solid ${topBorder}`,
         }}>
+            <BrowserTabs
+                sessions={sessions}
+                activeSessionId={activeId}
+                onSelectSession={setActiveId}
+                onAddSession={addSession}
+                onKillSession={killSession}
+                onOpenSettings={openSettings}
+                profiles={profiles}
+                darkTheme={!isLight}
+                ui={ui}
+                termBg={termBg}
+            />
 
-            {/* ── Terminal panes ── */}
-            <div style={{ flex: 1, minWidth: 0, position: 'relative' }}>
+            {/* Panes: kept mounted so xterm is never destroyed */}
+            <div style={{ flex: 1, position: 'relative', minHeight: 0 }}>
                 {sessions.map(session => (
                     <div
                         key={session.id}
                         style={{
-                            position: 'absolute', inset: 0,
-                            display: session.id === activeId ? 'block' : 'none',
+                            position:      'absolute',
+                            inset:         0,
+                            display:       'flex',
+                            flexDirection: 'column',
+                            overflow:      'hidden',
+                            // visibility swap instead of display:none so xterm
+                            // always has real pixel dimensions in the layout tree
+                            visibility:    session.id === activeId ? 'visible' : 'hidden',
+                            pointerEvents: session.id === activeId ? 'auto'    : 'none',
                         }}
                     >
-                        <TerminalView settings={settings} sessionId={session.id} />
+                        {session.kind === 'settings' ? (
+                            <Settings
+                                settings={settings}
+                                onChange={setSettings}
+                                profiles={profiles}
+                                onSaveProfile={saveProfile}
+                                onUpdateProfile={updateProfile}
+                                onApplyProfile={applyProfile}
+                                onDeleteProfile={deleteProfile}
+                                onRenameProfile={renameProfile}
+                            />
+                        ) : (
+                            <TerminalView
+                                settings={settings}
+                                sessionId={session.id}
+                                shell={session.shell}
+                                isActive={session.id === activeId}
+                            />
+                        )}
                     </div>
                 ))}
-            </div>
-
-            {/* ── Settings toggle button ── */}
-            <div style={{ flexShrink: 0, display: 'flex', alignItems: 'flex-start', padding: '10px 6px' }}>
-                <button
-                    onClick={() => setOpen(o => !o)}
-                    title="Settings"
-                    style={{
-                        background:   btnBase,
-                        border:       `1px solid ${btnBorder}`,
-                        borderRadius: 6,
-                        width:        30,
-                        height:       30,
-                        display:      'flex',
-                        alignItems:   'center',
-                        justifyContent: 'center',
-                        cursor:       'pointer',
-                        color:        btnColor,
-                        padding:      0,
-                        transition:   'background 0.15s, color 0.15s, border-color 0.15s',
-                    }}
-                    onMouseEnter={e => {
-                        e.currentTarget.style.background = btnHover
-                        e.currentTarget.style.color      = btnColorHover
-                    }}
-                    onMouseLeave={e => {
-                        e.currentTarget.style.background = btnBase
-                        e.currentTarget.style.color      = btnColor
-                    }}
-                >
-                    <RiSettings3Line size={15} />
-                </button>
-            </div>
-
-            {/* ── Settings panel ── */}
-            <div style={{
-                width:      open ? 300 : 0,
-                flexShrink: 0,
-                overflow:   'hidden',
-                transition: 'width 0.22s cubic-bezier(0.22,1,0.36,1)',
-            }}>
-                <Settings
-                    settings={settings}
-                    onChange={setSettings}
-                    onClose={() => setOpen(false)}
-                    sessions={sessions}
-                    activeSessionId={activeId}
-                    onSelectSession={setActiveId}
-                    onAddSession={addSession}
-                    onKillSession={killSession}
-                    onRenameSession={renameSession}
-                    profiles={profiles}
-                    onSaveProfile={saveProfile}
-                    onUpdateProfile={updateProfile}
-                    onApplyProfile={applyProfile}
-                    onDeleteProfile={deleteProfile}
-                    onRenameProfile={renameProfile}
-                />
             </div>
         </div>
     )

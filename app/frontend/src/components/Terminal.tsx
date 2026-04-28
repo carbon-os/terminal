@@ -2,12 +2,14 @@ import { useEffect, useRef } from 'react'
 import { Terminal } from '@xterm/xterm'
 import { FitAddon } from '@xterm/addon-fit'
 import '@xterm/xterm/css/xterm.css'
-import { TerminalSettings, THEME_PRESETS, FONT_FAMILIES } from './types'
+import { TerminalSettings, THEME_PRESETS, FONT_FAMILIES, ShellType } from './types'
 import { ipc } from '../ipc/client'
 
 interface Props {
     settings:  TerminalSettings
     sessionId: string
+    shell:     ShellType
+    isActive:  boolean
 }
 
 // ── Font loader ───────────────────────────────────────────────────────────────
@@ -15,7 +17,6 @@ interface Props {
 async function ensureFontLoaded(fontFamily: string, fontSize: number): Promise<void> {
     const entry = FONT_FAMILIES.find(f => f.value === fontFamily)
     if (entry?.system) return
-
     const name = fontFamily.split(',')[0].trim().replace(/['"]/g, '')
     try {
         await Promise.all([
@@ -27,7 +28,7 @@ async function ensureFontLoaded(fontFamily: string, fontSize: number): Promise<v
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-export default function TerminalView({ settings, sessionId }: Props) {
+export default function TerminalView({ settings, sessionId, shell, isActive }: Props) {
     const containerRef = useRef<HTMLDivElement>(null)
     const termRef      = useRef<Terminal | null>(null)
     const fitRef       = useRef<FitAddon | null>(null)
@@ -60,20 +61,16 @@ export default function TerminalView({ settings, sessionId }: Props) {
             termRef.current = term
             fitRef.current  = fit
 
-            // ── pty.out → xterm ───────────────────────────────────────────────
-            // All sessions share the channel; filter by sessionId in the packet.
             const unsubOut = ipc.on('pty.out', (payload, sid) => {
                 if (sid !== sessionId) return
                 term.write(new Uint8Array(payload))
             })
 
-            // ── pty.exit → notify xterm ───────────────────────────────────────
             const unsubExit = ipc.on('pty.exit', (_payload, sid) => {
                 if (sid !== sessionId) return
                 term.writeln('\r\n\x1b[31m[process exited]\x1b[0m')
             })
 
-            // ── xterm → pty.in ────────────────────────────────────────────────
             term.onData(data =>
                 ipc.sendBuf(
                     'pty.in',
@@ -83,23 +80,26 @@ export default function TerminalView({ settings, sessionId }: Props) {
                 )
             )
 
-            // ── resize → pty.resize ───────────────────────────────────────────
             term.onResize(({ cols, rows }) =>
                 ipc.sendJSON('pty.resize', sessionId, { cols, rows })
             )
 
-            // ── spawn ─────────────────────────────────────────────────────────
             ipc.sendJSON('pty.spawn', sessionId, {
-                cols: term.cols,
-                rows: term.rows,
+                cols:  term.cols,
+                rows:  term.rows,
+                shell,
             })
 
-            // ── ResizeObserver ────────────────────────────────────────────────
-            const ro = new ResizeObserver(() => fit.fit())
+            // ── ResizeObserver: skip zero-dimension frames, defer to next paint
+            const ro = new ResizeObserver(() => {
+                const el = containerRef.current
+                if (!el || el.offsetWidth === 0 || el.offsetHeight === 0) return
+                requestAnimationFrame(() => fitRef.current?.fit())
+            })
             ro.observe(containerRef.current!)
 
-            ;(term as any).__ro       = ro
-            ;(term as any).__unsub    = () => { unsubOut(); unsubExit() }
+            ;(term as any).__ro    = ro
+            ;(term as any).__unsub = () => { unsubOut(); unsubExit() }
         }
 
         init()
@@ -118,6 +118,14 @@ export default function TerminalView({ settings, sessionId }: Props) {
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [sessionId])
+
+    // ── Re-fit when this tab becomes active ───────────────────────────────────
+    useEffect(() => {
+        if (!isActive) return
+        const el = containerRef.current
+        if (!el || el.offsetWidth === 0 || el.offsetHeight === 0) return
+        requestAnimationFrame(() => fitRef.current?.fit())
+    }, [isActive])
 
     // ── Live-update settings ──────────────────────────────────────────────────
     useEffect(() => {

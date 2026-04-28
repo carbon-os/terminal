@@ -2,6 +2,7 @@
 
 export type CursorStyle = 'block' | 'underline' | 'bar'
 export type ThemePreset = 'dark' | 'vscode' | 'monokai' | 'dracula' | 'light'
+export type ShellType   = 'powershell' | 'cmd' | 'wsl2'
 
 export interface TerminalSettings {
   fontSize:      number
@@ -15,8 +16,10 @@ export interface TerminalSettings {
 }
 
 export interface TerminalSession {
-  id:   string
-  name: string
+  id:    string
+  name:  string
+  shell: ShellType
+  kind?: 'terminal' | 'settings'
 }
 
 export interface Profile {
@@ -25,9 +28,18 @@ export interface Profile {
   settings: TerminalSettings
 }
 
+export interface ShellDef {
+  type:  ShellType
+  label: string
+}
+
+export const SHELL_DEFS: ShellDef[] = [
+  { type: 'powershell', label: 'Windows PowerShell' },
+  { type: 'cmd',        label: 'Command Prompt'     },
+  { type: 'wsl2',       label: 'WSL2 Debian'        },
+]
+
 // ─── Font families ────────────────────────────────────────────────────────────
-// system: true  → already on the OS, document.fonts.load() not needed
-// system: false → loaded via @fontsource, must await document.fonts.load()
 
 export interface FontFamily {
   label:  string
@@ -50,6 +62,7 @@ export const FONT_FAMILIES: FontFamily[] = [
 // ─── Panel UI theme ───────────────────────────────────────────────────────────
 
 export interface PanelTheme {
+  tabBarBg:      string   // ← new: tab strip background
   panelBg:       string
   headerBg:      string
   footerBg:      string
@@ -129,6 +142,7 @@ export const DEFAULT_SETTINGS: TerminalSettings = {
 
 export const PANEL_THEMES: Record<ThemePreset, PanelTheme> = {
   dark: {
+    tabBarBg:      '#2e2e2e',   // noticeably lighter than terminal bg #1a1a1a
     panelBg:       '#161618',
     headerBg:      '#1c1c1e',
     footerBg:      '#131315',
@@ -148,6 +162,7 @@ export const PANEL_THEMES: Record<ThemePreset, PanelTheme> = {
     activeBg:      'rgba(255,255,255,0.07)',
   },
   vscode: {
+    tabBarBg:      '#323232',   // noticeably lighter than terminal bg #1e1e1e
     panelBg:       '#1e1e1e',
     headerBg:      '#252526',
     footerBg:      '#1a1a1a',
@@ -167,6 +182,7 @@ export const PANEL_THEMES: Record<ThemePreset, PanelTheme> = {
     activeBg:      'rgba(255,255,255,0.07)',
   },
   monokai: {
+    tabBarBg:      '#3e3d32',   // noticeably lighter than terminal bg #272822
     panelBg:       '#1e1f19',
     headerBg:      '#272822',
     footerBg:      '#191a14',
@@ -186,6 +202,7 @@ export const PANEL_THEMES: Record<ThemePreset, PanelTheme> = {
     activeBg:      'rgba(255,255,255,0.07)',
   },
   dracula: {
+    tabBarBg:      '#44475a',   // noticeably lighter than terminal bg #282a36
     panelBg:       '#1a1b26',
     headerBg:      '#21222c',
     footerBg:      '#161720',
@@ -205,6 +222,7 @@ export const PANEL_THEMES: Record<ThemePreset, PanelTheme> = {
     activeBg:      'rgba(255,255,255,0.07)',
   },
   light: {
+    tabBarBg:      '#dee1e6',   // original light tab bar — already works
     panelBg:       '#f4f4f6',
     headerBg:      '#ffffff',
     footerBg:      '#ebebed',
