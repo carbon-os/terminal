@@ -4,10 +4,10 @@ github.com/aymanbagabas/go-pty v0.2.2 h1:YZREB4eSj+1xdbbItIokX0ekjjeifgJOA+ZvxU4
 github.com/aymanbagabas/go-pty v0.2.2/go.mod h1:gfvlwH+0U66BCwxJREjJaAOEs9H1OFf3YFjI9WSiZ04=
 github.com/carbon-os/arc v1.0.0 h1:HsC57eGWSUKJrXeXRP76quqsUq65tlztaNxSY6h8u4k=
 github.com/carbon-os/arc v1.0.0/go.mod h1:MmB+rlwJ3Bd62ufduAAm5XFAgfX61njYTQMf4Zo4et8=
-github.com/carbon-os/arc v1.0.1-0.20260428062046-48a4940e4656 h1:66ArJ/EETa1vF1GRAaw2ZXaR4zB/+jANzpZVTKpbiFw=
-github.com/carbon-os/arc v1.0.1-0.20260428062046-48a4940e4656/go.mod h1:MmB+rlwJ3Bd62ufduAAm5XFAgfX61njYTQMf4Zo4et8=
-github.com/carbon-os/arc v1.0.1-0.20260428062800-040a1ff55ce0 h1:cE456+aD3a7+L7c668MOICvHWIV8rs2ucrmeDN+IIHM=
-github.com/carbon-os/arc v1.0.1-0.20260428062800-040a1ff55ce0/go.mod h1:MmB+rlwJ3Bd62ufduAAm5XFAgfX61njYTQMf4Zo4et8=
+github.com/carbon-os/arc v1.0.1-0.20260429150022-b9c3f71bd34b h1:H63lY9qG7FG65zOAz6Bly8sQeCCCNm2cK6lGASTz7A0=
+github.com/carbon-os/arc v1.0.1-0.20260429150022-b9c3f71bd34b/go.mod h1:MmB+rlwJ3Bd62ufduAAm5XFAgfX61njYTQMf4Zo4et8=
+github.com/carbon-os/arc v1.0.1-0.20260429185501-951204efcc6d h1:Os/p9a9WrBzVP7l3m7Hr8PIuoB/GJH+uWftsdv9zRY8=
+github.com/carbon-os/arc v1.0.1-0.20260429185501-951204efcc6d/go.mod h1:MmB+rlwJ3Bd62ufduAAm5XFAgfX61njYTQMf4Zo4et8=
 github.com/creack/pty v1.1.21 h1:1/QdRyBaHHJP61QkWMXlOIBfsgdDeeKfK8SYVUWJKf0=
 github.com/creack/pty v1.1.21/go.mod h1:MOBLtS5ELjhRRrroQr9kyvTxUAFNvYEK993ew/Vr4O4=
 github.com/gorilla/websocket v1.5.3 h1:saDtZ6Pbx/0u+bgYQ3q96pZgCzfhKXGPqt7kZ72aNNg=

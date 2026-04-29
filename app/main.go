@@ -415,7 +415,7 @@ func main() {
 	app := arc.NewApp(arc.AppConfig{
 		Title:    "Carbon Terminal",
 		Logging:  false,
-		Renderer: arc.RendererConfig{Prebuilt: true},
+		Renderer: arc.RendererConfig{Path: "/Users/galaxy/Desktop/arc/libarc/build/bin/arc-host"},
 	})
 
 	app.OnReady(func() {
@@ -424,6 +424,7 @@ func main() {
 			Width:  1000,
 			Height: 700,
 			Debug:  false,
+			TitleBarStyle: window.TitleBarHidden,
 		})
 
 		srv := &termServer{

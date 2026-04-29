@@ -1,10 +1,10 @@
 module app
 
-go 1.26.2
+go 1.26.1
 
 require (
 	github.com/aymanbagabas/go-pty v0.2.2
-	github.com/carbon-os/arc v1.0.1-0.20260428062800-040a1ff55ce0
+	github.com/carbon-os/arc v1.0.1-0.20260429185501-951204efcc6d
 )
 
 require (
